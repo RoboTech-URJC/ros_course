@@ -1,0 +1,8 @@
+[submodule "dependency_repos/turtlebot3_simulations"]
+	path = dependency_repos/turtlebot3_simulations
+	url = https://github.com/ROBOTIS-GIT/turtlebot3_simulations
+	branch = noetic-devel
+[submodule "dependency_repos/turtlebot3"]
+	path = dependency_repos/turtlebot3
+	url = https://github.com/ROBOTIS-GIT/turtlebot3
+	branch = noetic-devel
