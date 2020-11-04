@@ -84,7 +84,7 @@ def main(args):
     laser_sub = rospy.Subscriber("/scan", LaserScan, laser_callback, queue_size=1)
     vel_pub = rospy.Publisher("/cmd_vel", Twist, queue_size=1)
 
-    loop_rate = rospy.Rate(5)   # 2Hz
+    loop_rate = rospy.Rate(5)   # 5Hz
     try:
         while (not rospy.is_shutdown()):
             step(vel_pub)
