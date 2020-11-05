@@ -1,0 +1,6 @@
+min_laser_measure: 0.5
+forward_vel: 0.07
+backward_vel: -0.05
+turning_vel: 0.785
+back_time: 2.0
+turning_time: 2.0

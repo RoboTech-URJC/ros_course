@@ -1,0 +1,11 @@
+<launch>
+
+    <!-- Launch the node with its parameters file -->
+
+    <node pkg="parameters_py" type="bump_go_params_node.py" name="bump_go_params_node" output="screen">
+
+        <rosparam command="load" file="$(find parameters_py)/config/config_params.yaml" />
+
+    </node>
+
+</launch>
