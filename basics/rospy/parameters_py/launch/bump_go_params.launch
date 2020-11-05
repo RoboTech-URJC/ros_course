@@ -1,0 +1,25 @@
+<launch>
+
+    <!-- Declare Arguments -->
+
+    <arg name="min_laser_measure" default="0.5" />
+    <arg name="forward_vel" default="0.07" />
+    <arg name="backward_vel" default="-0.05" />
+    <arg name="turning_vel" default="0.785" />
+    <arg name="back_time" default="2.0" />
+    <arg name="turning_time" default="2.0" />
+
+    <!-- Launch the node with its parameters -->
+
+    <node pkg="parameters_py" type="bump_go_params_node.py" name="bump_go_params_node" output="screen">
+
+        <param name="min_laser_measure" type="double" value="$(arg min_laser_measure)" />
+        <param name="forward_vel" type="double" value="$(arg forward_vel)" />
+        <param name="backward_vel" type="double" value="$(arg backward_vel)" />
+        <param name="turning_vel" type="double" value="$(arg turning_vel)" />
+        <param name="back_time" type="double" value="$(arg back_time)" />
+        <param name="turning_time" type="double" value="$(arg turning_time)" />
+
+    </node>
+
+</launch>
