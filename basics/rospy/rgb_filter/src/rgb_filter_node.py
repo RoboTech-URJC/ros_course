@@ -43,7 +43,7 @@ class RGBFilter():
         self.rgb_img_ = msg
 
     def initParams_(self):
-        self.image_topic_ = rospy.get_param("image_sub", "camera/rgb/image_raw")
+        self.image_topic_ = rospy.get_param("~image_sub", "camera/rgb/image_raw")
 
 def main(args=None):
     rospy.init_node("rgb_filter_node")
