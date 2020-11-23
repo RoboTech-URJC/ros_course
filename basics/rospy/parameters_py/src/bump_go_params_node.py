@@ -3,6 +3,8 @@
 import rospy
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Pose
+from visualization_msgs.msg import Marker
 
 import sys
 import math
@@ -22,6 +24,7 @@ class Walker():
 
         self.laser_sub_ = rospy.Subscriber("/scan", LaserScan, self.laserCallback_, queue_size=1)
         self.vel_pub_ = rospy.Publisher("/cmd_vel", Twist, queue_size=1, latch=False)
+        self.marker_pub_ = rospy.Publisher("/bump_and_go/markers", Marker, queue_size=1)
 
     def step(self):
         vel_msg = Twist()
@@ -35,13 +38,14 @@ class Walker():
             yaw = 0.0
             if (self.laser_measure_ < self.min_laser_measure_):
                 self.state_ = self.go_backward_st_
+                self.t0_ = time.time()
         elif (self.state_ == self.go_backward_st_):
             x = self.backward_vel_
             yaw = 0.0
             tf= time.time()
             if (tf - self.t0_ >= self.back_time_):
                 self.state_ = self.turn_st_
-                self.t0_ = tf
+                self.t0_ = time.time()
         else:
             x = 0.0
             turning_vels = [-1, 1]
@@ -59,6 +63,40 @@ class Walker():
         vel_msg.angular.z = yaw
 
         self.vel_pub_.publish(vel_msg)
+        self.publishMarker_()
+
+    def publishMarker_(self):
+        pose = Pose()
+        marker_msg = Marker()
+
+        if (self.angle_measure_ < (math.pi / 2.0)):
+            angle = (math.pi / 2.0) - self.angle_measure_
+        else:
+            angle = (2 * math.pi) - self.angle_measure_
+            angle = (math.pi / 2.0) + angle
+
+        pose.position.x = abs(self.laser_measure_ * math.sin(angle))
+        pose.position.y = self.laser_measure_ * math.cos(angle)
+        if (angle > math.pi / 2.0):
+            pose.position.y = pose.position.y * (-1)
+        pose.position.z = 0.0
+
+        pose.orientation.x = pose.orientation.y = pose.orientation.z = 0.0
+        pose.orientation.w = 1.0
+
+        marker_msg.header.frame_id = "base_scan"
+        marker_msg.ns = "bump_and_go"
+        marker_msg.pose = pose
+        marker_msg.scale.x = marker_msg.scale.y = marker_msg.scale.z = 0.1   # 10cm
+        marker_msg.color.r = 1.0
+        marker_msg.color.g = marker_msg.color.b = 0.0
+        marker_msg.color.a = 1.0
+        marker_msg.lifetime = rospy.Duration(secs=0.1)
+        marker_msg.type = marker_msg.SPHERE
+        marker_msg.action = marker_msg.ADD
+        marker_msg.frame_locked = False
+
+        self.marker_pub_.publish(marker_msg)
 
     def initParams_(self):
         # States:
@@ -77,6 +115,7 @@ class Walker():
         self.turning_time_ = rospy.get_param("~turning_time", 2.0)
 
         self.laser_measure_ = None
+        self.angle_measure_ = None
         self.state_ = 0
         self.is_first_turn_ = True
         self.yaw_vel_ = 0.0
@@ -91,9 +130,23 @@ class Walker():
         rospy.loginfo("Turning Time: %f\n", self.turning_time_)
 
     def laserCallback_(self, msg):
-        # Save the laser measure that correspond to the front:
+        # Save the minimum laser measure that correspond to the front:
 
-        self.laser_measure_ = msg.ranges[0]
+        dist = msg.range_max
+        angle = 0.0
+        for i in range(len(msg.ranges) - 10, len(msg.ranges)):
+            if(msg.ranges[i] < dist):
+                dist = msg.ranges[i]
+                angle = i * msg.angle_increment
+        
+        for i in range(0, 11):
+            if(msg.ranges[i] < dist):
+                dist = msg.ranges[i]
+                angle = i * msg.angle_increment
+
+        self.laser_measure_ = dist
+        self.angle_measure_ = angle
+        rospy.loginfo("Measure: %f m, %f rad", dist, angle)
 
 def main(args):
     # Initialize the node:
