@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>simple_pub_cpp</name>
+  <name>simple_pub_sub_cpp</name>
   <version>1.0.0</version>
-  <description>The simple_pub_cpp package</description>
+  <description>The simple_pub_sub_cpp package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
